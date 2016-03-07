@@ -1,0 +1,28 @@
+$computers= "."
+
+foreach($computer in $computers){
+
+$output = "" | Select-Object -Property Computer, Manufacturer, ProductCode, SerialNumber, Name, Week, Year
+
+	$ComputerSystem = get-wmiobject Win32_ComputerSystem -Computer $computer
+	$ComputerBios = get-wmiobject Win32_Bios -Computer $computer
+	$ComputerOS = get-wmiobject Win32_OperatingSystem -Computer $computer
+	$ComputerCPU = get-wmiobject Win32_Processor -Computer $computer
+	$ComputerHDD = get-wmiobject -class Win32_DiskDrive -namespace root/cimv2 -Computer $computer
+	$ComputerVideo = get-wmiobject -class CIM_VideoController -namespace root/cimv2 -Computer $computer
+	$ComputerNetwork = get-wmiobject -class CIM_NetworkAdapter -namespace root/cimv2
+
+	"Hostname: " +$ComputerSystem.name | foreach {$output.Name}
+	"Manufacturer: " +$ComputerSystem.manufacturer
+	"Model: " +$ComputerSystem.model
+	"Serialnumber: " +$ComputerBios.SerialNumber
+	"Cpu: " +$ComputerCpu.name
+	foreach ($HDD in $ComputerHDD ) {
+	"HDD Capacity: " + ($HDD.Size/1073741824) + "GB"
+	}
+	"Ram: " +($computerSystem.TotalPhysicalMemory/1073741824) + "GB"
+	"VideoCard: " +$ComputerVideo.VideoProcessor
+	"Operating System: " + $computerOS.caption + $computerOS.OsArchitecture + ", Service Pack: " + $computerOS.ServicePackMajorVersion
+	 $output = "" | Select-Object -Property Computer, Manufacturer, ProductCode, SerialNumber, Name, Week, Year
+}
+$output | Export-Csv hddsize.csv
